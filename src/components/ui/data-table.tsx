@@ -20,7 +20,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ChevronLeft, ChevronRight, Settings2, Trash } from "lucide-react"
+import {
+  ChevronLeft,
+  ChevronRight,
+  PlusIcon,
+  Settings2,
+  Trash,
+} from "lucide-react"
 
 // hooks
 import { useConfirm } from "@/lib/hooks/use-confirm"
@@ -44,6 +50,7 @@ import type {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
+import { useRouter } from "next-nprogress-bar"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -52,7 +59,7 @@ interface DataTableProps<TData, TValue> {
   onDelete: (rows: Row<TData>[]) => void
   disabled?: boolean
   isOnUsers?: boolean
-  isOnReports?: boolean
+  isOnProperties?: boolean
   placeholder: string
 }
 
@@ -63,9 +70,12 @@ export default function DataTable<TData, TValue>({
   onDelete,
   disabled,
   isOnUsers,
-  isOnReports,
+  isOnProperties,
   placeholder,
 }: DataTableProps<TData, TValue>) {
+  // init router
+  const router = useRouter()
+
   // confirmation state
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
@@ -159,7 +169,17 @@ export default function DataTable<TData, TValue>({
             {isOnUsers && <CreateUserModal />}
 
             {/* create ne report */}
-            {/* {isOnReports && <CreateReportModal />} */}
+            {isOnProperties && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="shadow-sm"
+                onClick={() => router.push("/properties/new")}
+              >
+                <PlusIcon className="mr-2 size-4" aria-hidden="true" />
+                New Property
+              </Button>
+            )}
 
             {/* visibility */}
             <DropdownMenu>

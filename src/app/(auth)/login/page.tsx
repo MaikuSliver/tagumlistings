@@ -2,6 +2,9 @@
 import LoginForm from "@/app/(auth)/login/_components/login-form"
 import BounceWrapper from "@/components/shared/bounce"
 
+// assets
+import bgAuth from "@/app/assets/images/bg_auth.jpg"
+
 // utils
 import Image from "next/image"
 import Link from "next/link"
@@ -16,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <main className="flex h-screen items-center justify-center p-5">
+    <main className="flex h-screen items-center justify-center p-5 bg-zinc-50 dark:bg-zinc-900">
       <BounceWrapper>
         <div className="flex h-full max-h-[27rem] w-full max-w-[64rem] overflow-hidden rounded-2xl bg-card shadow-2xl">
           <div className="w-full space-y-10 overflow-y-auto p-10 md:w-1/2">
@@ -39,7 +42,7 @@ export default function LoginPage() {
 
           {/* bg */}
           <Image
-            src="/images/login.jpg"
+            src={bgAuth}
             alt=""
             className="hidden w-1/2 object-cover md:block"
             width={1920}

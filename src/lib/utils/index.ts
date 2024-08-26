@@ -12,6 +12,13 @@ import type DOMPurify from "dompurify"
 import type { NextRequest } from "next/server"
 import type { z } from "zod"
 
+export const getPercentageChangeColor = (percentageChange: string) => {
+  const value = Number.parseFloat(percentageChange)
+  return value >= 0
+    ? "text-green-600 dark:text-green-400"
+    : "text-red-600 dark:text-red-400"
+}
+
 // Helper function to determine badge color based on role
 export const getRoleBadgeColor = (role: string) => {
   switch (role.toLowerCase()) {
@@ -19,6 +26,10 @@ export const getRoleBadgeColor = (role: string) => {
       return "bg-blue-100 text-blue-800 hover:text-white dark:hover:text-black"
     case "admin":
       return "bg-green-100 text-green-800 hover:text-white dark:hover:text-black"
+    case "sold":
+      return "bg-green-100 text-green-800 hover:text-white dark:hover:text-black"
+    case "reserved":
+      return "bg-blue-100 text-blue-800 hover:text-white dark:hover:text-black"
     default:
       return "bg-gray-100 text-gray-800"
   }
