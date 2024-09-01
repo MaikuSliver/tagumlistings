@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PropertyController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,7 @@ Route::middleware(['web', 'guest'])->group(function () {
 Route::middleware(['web', 'auth:sanctum', 'check.token.expiration'])->group(function () {
 
     // User management routes
+    Route::get('/get/profile', [AuthController::class, 'getProfile']);
     Route::get('/get/accounts', [AuthController::class, 'getAllAccounts']);
     Route::get('/get/account/{id}', [AuthController::class, 'getAccountByID']);
 
@@ -25,16 +27,16 @@ Route::middleware(['web', 'auth:sanctum', 'check.token.expiration'])->group(func
 
     // Client routes
     Route::middleware('role:client')->group(function () {
-        Route::get('/client', [PropertyController::class, 'client']);
+        Route::get('/payment/history/{property_id}', [PaymentController::class, 'getPaymentHistory']);
     });
 
     
     // Client representative routes
-    Route::middleware('role:client_representative')->group(function () {
+    Route::middleware('role:company_representative')->group(function () {
         Route::apiResource('property', PropertyController::class);
         Route::apiResource('appointments', AppointmentController::class);
 
-
+        Route::post('/add/payment', [PaymentController::class, 'addPayment']);
         Route::patch('/reserve/property/{property}', [PropertyController::class, 'reserve']);
         Route::patch('/sold/property/{property}', [PropertyController::class, 'sold']);
     });

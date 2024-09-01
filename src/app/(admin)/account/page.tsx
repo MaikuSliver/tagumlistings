@@ -5,7 +5,7 @@ import BounceWrapper from "@/components/shared/bounce"
 import DynamicBreadcrumb from "@/components/shared/dynamic-breadcrumb"
 
 // utils
-import { dashboardItems } from "@/lib/misc/breadcrumb-lists"
+import { accountItems } from "@/lib/misc/breadcrumb-lists"
 
 // types
 import type { Metadata } from "next"
@@ -20,7 +20,7 @@ export default function AccountPage() {
     <ContentLayout title="Account">
       <BounceWrapper>
         {/* breadcrumb */}
-        <DynamicBreadcrumb items={dashboardItems} />
+        <DynamicBreadcrumb items={accountItems} />
 
         {/* client */}
         <AccountClient />

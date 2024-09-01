@@ -1,9 +1,9 @@
 "use client"
 
 // components
+import NewPropertyForm from "@/app/(admin)/properties/new/_components/new-property-form"
 import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
-import NewPropertyForm from "./new-property-form"
 
 // hooks
 // import { useRouter } from "next/navigation"

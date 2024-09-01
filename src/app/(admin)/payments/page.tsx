@@ -5,6 +5,7 @@ import BounceWrapper from "@/components/shared/bounce"
 import DynamicBreadcrumb from "@/components/shared/dynamic-breadcrumb"
 
 // utils
+import { payments } from "@/app/(admin)/payments/constants"
 import { paymentsItems } from "@/lib/misc/breadcrumb-lists"
 
 // types
@@ -23,7 +24,7 @@ export default function PaymentsPage() {
         <DynamicBreadcrumb items={paymentsItems} />
 
         {/* client */}
-        <PaymentsClient />
+        <PaymentsClient data={payments} />
       </BounceWrapper>
     </ContentLayout>
   )
