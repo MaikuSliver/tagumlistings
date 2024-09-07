@@ -50,8 +50,8 @@
     "next": "14.2.7",
     "next-nprogress-bar": "2.3.13",
     "next-themes": "0.3.0",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
     "react-hook-form": "7.53.0",
     "react-hot-toast": "2.4.1",
@@ -78,5 +78,7 @@
     "upgradeps": "2.0.6"
   },
   "packageManager": "bun@1.1.27",
-  "trustedDependencies": ["@biomejs/biome"]
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ]
 }
