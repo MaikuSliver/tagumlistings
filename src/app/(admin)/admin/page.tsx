@@ -1,11 +1,16 @@
 // components
-import ContentLayout from "@/app/(admin)/_components/content-layout"
-import AdminDashboardClient from "@/app/(admin)/admin/_components/client"
-import BounceWrapper from "@/components/shared/bounce"
+import HydrationBoundaryWrapper from "@/components/shared/hydration-boundary"
+import AdminDashboardClient from "@/app/(admin)/_components/dashboard/client"
+import ContentLayout from "@/app/(admin)/_components/shared/content-layout"
 import DynamicBreadcrumb from "@/components/shared/dynamic-breadcrumb"
+import BounceWrapper from "@/components/shared/bounce"
+
+// actions
+import { getSession } from "@/app/(auth)/_actions/session/get"
 
 // utils
 import { dashboardItems } from "@/lib/misc/breadcrumb-lists"
+import { dataSerializer } from "@/lib/utils"
 
 // types
 import type { Metadata } from "next"
@@ -15,16 +20,22 @@ export const metadata: Metadata = {
   title: "Admin",
 }
 
-export default function AdminDashboardPage() {
-  return (
-    <ContentLayout title="Dashboard">
-      <BounceWrapper>
-        {/* breadcrumb */}
-        <DynamicBreadcrumb items={dashboardItems} />
+export default async function AdminDashboardPage() {
+  // get session
+  const session = await getSession()
 
-        {/* client */}
-        <AdminDashboardClient />
-      </BounceWrapper>
-    </ContentLayout>
+  // session serialize
+  const userData = dataSerializer(session)
+
+  return (
+    <HydrationBoundaryWrapper accountId={userData.id}>
+      <ContentLayout title="Dashboard">
+        <BounceWrapper>
+          <DynamicBreadcrumb items={dashboardItems} />
+
+          <AdminDashboardClient />
+        </BounceWrapper>
+      </ContentLayout>
+    </HydrationBoundaryWrapper>
   )
 }

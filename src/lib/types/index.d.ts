@@ -10,12 +10,18 @@ import type {
 
 /* --------------HTTP Requests Types---------------- */
 
-/* RequestConfig Type */
+/* Compatible Request Type */
+export interface CompatibleRequest extends IncomingMessage {
+  headers: Record<string, string | string[]>
+}
+
+// init request config
 export type RequestConfig<T> = {
-  url: string
+  url?: string
   params?: Record<string, string | number | boolean>
   headers?: HeadersInit
   transformResponse?: (data: unknown) => T
+  customURL?: string
 }
 
 /* ErrorResponseData Type */
@@ -46,11 +52,23 @@ interface SelectOption {
 /* FieldConfig Type */
 interface FieldConfig<TFieldValues> {
   name: Path<TFieldValues>
-  type: "text" | "password" | "email" | "number" | "select" | "image"
+  type:
+    | "text"
+    | "password"
+    | "email"
+    | "number"
+    | "select"
+    | "image"
+    | "switch"
+    | "date"
+    | "color"
   label: string
-  placeholder: string
+  placeholder?: string
   className?: string
+  accept?: "image/*"
   options?: SelectOption[]
+  isPhone?: boolean
+  multiple?: boolean
 }
 
 /* Mutation Type */
@@ -80,3 +98,16 @@ interface DynamicFormProps<TFieldValues extends FieldValues> {
 
 /* Unique Id Type */
 export type UniqueId = string
+
+export interface UserData {
+  id?: string
+  name: string
+  address: string
+  contact_number: string
+  email: string
+  role: string
+  password?: string
+  loggedIn?: boolean
+  createdAt?: string
+  updatedAt?: string
+}

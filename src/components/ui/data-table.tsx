@@ -2,7 +2,7 @@
 
 // components
 // import CreateReportModal from "@/components/modals/create-report"
-import CreateUserModal from "@/app/(admin)/admin/users/_components/create-user"
+import CreateUserModal from "@/app/(admin)/_components/users/create-user"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -81,7 +81,7 @@ export default function DataTable<TData, TValue>({
   // confirmation state
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
-    "You are about to perform a bulk delete accounts.",
+    "You are about to perform a bulk delete.",
   )
 
   // init sorting state

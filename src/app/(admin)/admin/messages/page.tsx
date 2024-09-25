@@ -1,6 +1,6 @@
 // components
-import ContentLayout from "@/app/(admin)/_components/content-layout"
-import MessagesClient from "@/app/(admin)/admin/messages/_components/client"
+import ContentLayout from "@/app/(admin)/_components/shared/content-layout"
+import MessagesClient from "@/app/(admin)/_components/messages/client"
 import BounceWrapper from "@/components/shared/bounce"
 import DynamicBreadcrumb from "@/components/shared/dynamic-breadcrumb"
 
@@ -23,7 +23,7 @@ export default function MessagesPage() {
         <DynamicBreadcrumb items={messagesItems} />
 
         {/* client */}
-        <MessagesClient />
+        <MessagesClient isAdmin />
       </BounceWrapper>
     </ContentLayout>
   )

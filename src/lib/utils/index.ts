@@ -1,25 +1,57 @@
 // utils
-import { clsx } from "clsx"
 import { NextResponse } from "next/server"
-import toast from "react-hot-toast"
 import { twMerge } from "tailwind-merge"
+import toast from "react-hot-toast"
+import { format, isValid, parseISO } from "date-fns"
 import { ZodError } from "zod"
+import { clsx } from "clsx"
 
 // types
 import type { ErrorResponseData, UniqueId } from "@/lib/types"
+import type { SessionData } from "@/lib/config/session"
+import type { NextRequest } from "next/server"
 import type { ClassValue } from "clsx"
 import type DOMPurify from "dompurify"
-import type { NextRequest } from "next/server"
 import type { z } from "zod"
 
+export function convertTimestampToDateString(timestamp: {
+  seconds: number
+  nanoseconds: number
+}): string {
+  const date = new Date(
+    timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000,
+  )
+  return format(date, "yyyy-MM-dd'T'HH:mm:ssXXX")
+}
+
+export const isValidSessionData = (user: any): user is SessionData => {
+  return (
+    typeof user.id === "string" &&
+    typeof user.name === "string" &&
+    typeof user.address === "string" &&
+    typeof user.contact_number === "string" &&
+    typeof user.email === "string" &&
+    typeof user.role === "string"
+  )
+}
+
+export const getInitials = (name: string) => {
+  if (!name) return ""
+  const [firstName, lastName] = name.split(" ")
+  const firstLetter = firstName ? firstName[0] : ""
+  const lastLetter = lastName ? lastName.slice(-1) : firstName?.slice(-1)
+  return `${firstLetter}${lastLetter}`.toUpperCase()
+}
+
 // Helper function to format date
-export const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "numeric",
-  })
+export const formatDate = (date: Date | string): string => {
+  if (typeof date === "string") {
+    const parsedDate = parseISO(date)
+    return isValid(parsedDate)
+      ? format(parsedDate, "MMMM d, yyyy h:mm a")
+      : "Invalid Date"
+  }
+  return format(date, "MMMM d, yyyy h:mm a")
 }
 
 // change color badge function
@@ -37,8 +69,10 @@ export const getRoleBadgeColor = (role: string) => {
       return "bg-blue-100 text-blue-800 hover:text-white dark:hover:text-black"
     case "admin":
       return "bg-green-100 text-green-800 hover:text-white dark:hover:text-black"
+    case "available":
+      return "bg-yellow-100 text-yellow-800 hover:text-white dark:hover:text-black"
     case "sold":
-      return "bg-green-100 text-green-800 hover:text-white dark:hover:text-black"
+      return "bg-red-100 text-red-800 hover:text-white dark:hover:text-black"
     case "reserved":
       return "bg-blue-100 text-blue-800 hover:text-white dark:hover:text-black"
     default:
@@ -201,7 +235,9 @@ export function formatBytes(
   if (bytes === 0) return "0 Byte"
   const i = Math.floor(Math.log(bytes) / Math.log(1024))
   return `${(bytes / 1024 ** i).toFixed(decimals)} ${
-    sizeType === "accurate" ? accurateSizes[i] ?? "Bytes" : sizes[i] ?? "Bytes"
+    sizeType === "accurate"
+      ? (accurateSizes[i] ?? "Bytes")
+      : (sizes[i] ?? "Bytes")
   }`
 }
 

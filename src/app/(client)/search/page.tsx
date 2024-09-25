@@ -1,6 +1,14 @@
 // components
 import { BlurFade } from "@/components/shared/blur-fade"
-import SearchClient from "@/app/(client)/search/_components/client"
+import SearchClient from "@/app/(client)/_components/search/client"
+
+// types
+import type { Metadata } from "next"
+
+// meta data
+export const metadata: Metadata = {
+  title: "Search Property",
+}
 
 export default function SearchPage() {
   return (

@@ -2,12 +2,7 @@
 import { env } from "@/lib/config/env.mjs"
 
 // utils
-import {
-  HttpError,
-  buildQueryString,
-  clientErrorHandler,
-  dataSerializer,
-} from "@/lib/utils"
+import { HttpError, buildQueryString, dataSerializer } from "@/lib/utils"
 
 // types
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH"
@@ -36,12 +31,15 @@ async function makeHttpRequest<RequestType = unknown, ResponseType = unknown>(
     body,
     transformResponse,
     customURL,
-    timeout = 24 * 60 * 60,
+    timeout = 24 * 60 * 60 * 1000,
     retries = 3,
   } = config
 
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeout)
+  const timeoutId = setTimeout(() => {
+    controller.abort()
+    throw new HttpError(408, "Request timed out")
+  }, timeout)
 
   const makeRequest = async (attempt: number): Promise<ResponseType> => {
     try {
@@ -52,7 +50,7 @@ async function makeHttpRequest<RequestType = unknown, ResponseType = unknown>(
       const fullUrl = url
         ? `${env.NEXT_PUBLIC_APP_URL}/api/v1/${url}${buildQueryString(params)}`
         : ""
-      let requestUrl = customURL || fullUrl
+      const requestUrl = customURL || fullUrl
 
       // Validate URL
       try {
@@ -72,30 +70,27 @@ async function makeHttpRequest<RequestType = unknown, ResponseType = unknown>(
       }
 
       if (method === "GET" && body) {
-        const serializedBody = dataSerializer(body)
-        const bodyParams = new URLSearchParams(
-          serializedBody as Record<string, string>,
-        )
-        requestUrl +=
-          (requestUrl.includes("?") ? "&" : "?") + bodyParams.toString()
-      } else if (body) {
+        throw new HttpError(400, "GET request should not have a body")
+      }
+
+      if (body) {
         const serializedBody = dataSerializer(body)
         requestOptions.body = JSON.stringify(serializedBody)
       }
 
-      // Perform fetch request
       const response = await fetch(requestUrl, requestOptions)
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await response.json().catch(() => ({}))
         throw new HttpError(
           response.status,
           errorData.error || "A network error occurred.",
         )
       }
 
-      let data: unknown
       const textResponse = await response.text()
+      let data: unknown
+
       try {
         data = JSON.parse(textResponse)
       } catch (error) {
@@ -104,7 +99,6 @@ async function makeHttpRequest<RequestType = unknown, ResponseType = unknown>(
       }
 
       const serializedData = dataSerializer(data)
-
       const transformedData: ResponseType = transformResponse
         ? transformResponse(serializedData)
         : (serializedData as ResponseType)
@@ -115,21 +109,24 @@ async function makeHttpRequest<RequestType = unknown, ResponseType = unknown>(
         throw error
       }
 
-      if (attempt < retries) {
+      if (attempt < retries - 1) {
         console.warn(`Request failed, retrying (${attempt + 1}/${retries})`)
         return makeRequest(attempt + 1)
       }
 
-      throw error
-    } finally {
-      clearTimeout(timeoutId)
+      console.error(`Request failed after ${retries} attempts`)
+      throw new HttpError(500, "The request failed after multiple attempts")
     }
   }
 
   try {
-    return await makeRequest(0)
+    const result = await makeRequest(0)
+    clearTimeout(timeoutId)
+    return result
   } catch (error) {
-    throw clientErrorHandler(error)
+    clearTimeout(timeoutId)
+    controller.abort()
+    throw error
   }
 }
 

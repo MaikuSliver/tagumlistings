@@ -1,8 +1,4 @@
 // components
-import MediaImage from "@/components/shared/media-image"
-import SubmitButton from "@/components/shared/submit-button"
-import { Button } from "@/components/ui/button"
-import { FloatingLabelInput } from "@/components/ui/floating-label-input"
 import {
   Form,
   FormControl,
@@ -17,11 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { IKUpload } from "imagekitio-next"
-import { Loader2, Upload, X } from "lucide-react"
-
-// hooks
-import { useRef, useState } from "react"
+import { FloatingLabelInput } from "@/components/ui/floating-label-input"
+import SubmitButton from "@/components/shared/submit-button"
+import ImageUpload from "@/components/shared/image-upload"
+import { InputPhone } from "@/components/ui/input-phone"
+import { Switch } from "@/components/ui/switch"
 
 // utils
 import { cn } from "@/lib/utils"
@@ -29,7 +25,6 @@ import { cn } from "@/lib/utils"
 // types
 import type { DynamicFormProps } from "@/lib/types"
 import type { FieldValues } from "react-hook-form"
-import toast from "react-hot-toast"
 
 const DynamicForm = <TFieldValues extends FieldValues>({
   form,
@@ -42,23 +37,6 @@ const DynamicForm = <TFieldValues extends FieldValues>({
   submitButtonClassname,
   submitButtonTitleClassname,
 }: DynamicFormProps<TFieldValues>) => {
-  const [isUploading, setIsUploading] = useState(false)
-  const uploadRef = useRef<HTMLInputElement>(null)
-
-  const handleSuccess = (result: any, field: any) => {
-    setIsUploading(false)
-    if (result?.url) {
-      const currentImages = (form.getValues(field.name) as string[]) || []
-      form.setValue(field.name, [...currentImages, result.url] as any)
-      toast.success("Image Uploaded.")
-    }
-  }
-
-  const handleError = (error: any) => {
-    setIsUploading(false)
-    toast.error(`Upload Error: ${error}`)
-  }
-
   return (
     <Form {...form}>
       <form
@@ -82,14 +60,17 @@ const DynamicForm = <TFieldValues extends FieldValues>({
                       <SelectTrigger
                         className={cn(
                           form.formState.errors[field.name]
-                            ? "border-red-600 focus:ring-0"
-                            : "",
+                            ? "border-red-600 focus:ring-0 text-red-500"
+                            : "text-black dark:text-white",
                           field.className,
                         )}
                       >
-                        <SelectValue placeholder={field.placeholder} />
+                        <SelectValue
+                          className="text-black dark:text-white"
+                          placeholder={field.placeholder}
+                        />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="text-black dark:text-white">
                         {field.options?.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
@@ -98,79 +79,53 @@ const DynamicForm = <TFieldValues extends FieldValues>({
                       </SelectContent>
                     </Select>
                   ) : field.type === "image" ? (
-                    <div>
+                    <ImageUpload
+                      value={formField.value.map(
+                        (image: { url: string }) => image.url,
+                      )}
+                      onChange={(urls: string[]) => {
+                        formField.onChange(urls.map((url: string) => ({ url })))
+                      }}
+                      onRemove={(url: string) => {
+                        formField.onChange(
+                          formField.value.filter(
+                            (current: any) => current.url !== url,
+                          ),
+                        )
+                      }}
+                    />
+                  ) : field.type === "switch" ? (
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        checked={formField.value === "admin"}
+                        onCheckedChange={(checked) => {
+                          formField.onChange(checked ? "admin" : "client")
+                        }}
+                        disabled={mutation?.isPending || disabled}
+                      />
                       <label
                         htmlFor={field.name}
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        {field.label}
+                        {formField.value === "admin" ? "Admin" : "Client"}
                       </label>
-                      <div className="flex flex-col gap-2">
-                        <IKUpload
-                          multiple={true}
-                          useUniqueFileName
-                          onError={handleError}
-                          onSuccess={(result: any) =>
-                            handleSuccess(result, field)
-                          }
-                          ref={uploadRef}
-                          className="hidden"
-                        />
-                        <Button
-                          type="button"
-                          onClick={() => {
-                            setIsUploading(true)
-                            uploadRef.current?.click()
-                          }}
-                          className="dark:text-white bg-green-600 hover:bg-green-500 rounded-xl p-2"
-                        >
-                          {isUploading ? (
-                            <>
-                              <Loader2 className="animate-spin size-5" />
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="mr-2 size-5" />
-                              Upload Images
-                            </>
-                          )}
-                        </Button>
-                        {Array.isArray(formField.value) &&
-                          formField.value.length > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {formField.value.map(
-                                (imageUrl: string, index: number) => (
-                                  <div key={index} className="relative">
-                                    <MediaImage
-                                      src={imageUrl}
-                                      alt={`Uploaded ${index + 1}`}
-                                      className="size-32 rounded-md"
-                                      width={400}
-                                      height={400}
-                                    />
-                                    <Button
-                                      type="button"
-                                      onClick={() => {
-                                        const newImages = [
-                                          ...formField.value,
-                                        ] as string[]
-                                        newImages.splice(index, 1)
-                                        form.setValue(
-                                          field.name,
-                                          newImages as any,
-                                        )
-                                      }}
-                                      className="absolute top-0 right-0 bg-red-500 hover:bg-red-600 text-white rounded-md p-1"
-                                    >
-                                      <X className="size-4" />
-                                    </Button>
-                                  </div>
-                                ),
-                              )}
-                            </div>
-                          )}
-                      </div>
                     </div>
+                  ) : field.isPhone ? (
+                    <InputPhone
+                      {...formField}
+                      id={field.name}
+                      placeholder={field.placeholder}
+                      disabled={mutation?.isPending || disabled}
+                      className={cn(
+                        form.formState.errors[field.name]
+                          ? "border-red-600 focus:ring-0"
+                          : "",
+                        field.className,
+                      )}
+                      onChange={(value) =>
+                        formField.onChange(value?.toString() || "")
+                      }
+                    />
                   ) : (
                     <FloatingLabelInput
                       {...formField}
@@ -201,7 +156,7 @@ const DynamicForm = <TFieldValues extends FieldValues>({
           title={submitButtonTitle}
           disabled={mutation?.isPending || disabled}
           buttonClassName={cn(
-            "w-full focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-600",
+            "w-full focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-600 dark:hover:text-black",
             submitButtonClassname,
           )}
           titleClassName={submitButtonTitleClassname}
